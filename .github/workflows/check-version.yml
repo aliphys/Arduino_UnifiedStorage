@@ -20,7 +20,7 @@ jobs:
         id: get_latest_release
         run: |
           response=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest")
-          echo "Curl eesponse: $response"
+          echo "Curl response: $response"
           latest_release=$(echo "$response" | jq -r .tag_name)
           echo "Latest release: $latest_release"
           echo "release=${latest_release}" >> $GITHUB_ENV
@@ -34,10 +34,10 @@ jobs:
           echo "Version in library.properties: $version"
           if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
             echo "Versions match!"
-            $deleteRelease=0
+            deleteRelease=0
           else
             echo "Versions don't match."
-            $deleteRelease=1
+            deleteRelease=1
           fi
 
       - name: Delete release if failed
