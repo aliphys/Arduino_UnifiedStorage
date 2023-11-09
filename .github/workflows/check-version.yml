@@ -46,4 +46,4 @@ jobs:
         uses: cb80/delrel@latest
         with:
           tag: ${{ steps.get_latest_release.outputs.release }}
-          token: ${{ secrets.MY_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
