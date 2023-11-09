@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    release:
-        types:
-        - published
+  release:
+    types:
+      - published
 
 jobs:
   get_release:
@@ -29,12 +29,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check version in library.properties
+        id: compare_version
         run: |
           version=$(cat library.properties | grep "version" | cut -d'=' -f2)
           echo "Version in library.properties: $version"
           if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
             echo "Versions match!"
+            deleteRelease=0
           else
             echo "Versions don't match."
-            exit 1
+            deleteRelease=1
+          fi
+
+      - name: Delete release if failed
+        if: ${{ steps.compare_version.outputs.release != steps.get_latest_release.outputs.release }}
+        run: |
+          if [ $deleteRelease == 0 ]; then
+              echo "Release verified!"
+          else
+              echo "Release Deleted"
+              # Modify the below lines based on the requirements of cb80/delrel
+              echo "tag: latest"
+              echo "token: ${{ secrets.MY_TOKEN }}"
+              exit 1
           fi
