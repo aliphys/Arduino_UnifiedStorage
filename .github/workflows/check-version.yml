@@ -43,13 +43,7 @@ jobs:
 
       - name: Delete release if failed
         if: ${{ steps.compare_version.outputs.release != steps.get_latest_release.outputs.release }}
-        run: |
-          if [ $deleteRelease == 0 ]; then
-              echo "Release verified!"
-          else
-              echo "Release Deleted"
-              # Modify the below lines based on the requirements of cb80/delrel
-              echo "tag: latest"
-              echo "token: ${{ secrets.MY_TOKEN }}"
-              exit 1
-          fi
+        uses: cb80/delrel@latest
+        with:
+          tag: ${{ steps.get_latest_release.outputs.release }}
+          token: ${{ secrets.MY_TOKEN }}
