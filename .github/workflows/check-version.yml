@@ -47,3 +47,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Fail workflow if failed
+        if: ${{ steps.compare_version.outputs.version != steps.get_latest_release.outputs.release }}
+        run: |
+          echo "Versions don't match. Failing the workflow."
+          exit 1
