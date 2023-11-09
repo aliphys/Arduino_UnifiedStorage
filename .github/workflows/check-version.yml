@@ -23,6 +23,7 @@ jobs:
           echo "Curl eesponse: $response"
           latest_release=$(echo "$response" | jq -r .tag_name)
           echo "Latest release: $latest_release"
+          echo "release=${latest_release}" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
