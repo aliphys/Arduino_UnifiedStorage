@@ -30,16 +30,12 @@ jobs:
         run: |
           version=$(cat library.properties | grep "version" | cut -d'=' -f2)
           echo "Version in library.properties: $version"
+          echo "Version in release:            ${{steps.get_latest_release.outputs.release }}"
+          
           if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
             echo "Versions match!"
-            echo "Version is $version"
-            echo "Release version is: ${{steps.get_latest_release.outputs.release }}"
-            deleteRelease=0
           else
             echo "Versions don't match."
-            echo "Version is $version"
-            echo "Release version is: ${{steps.get_latest_release.outputs.release }}"
-            deleteRelease=1
           fi
           echo "::set-output name=version::$version"
 
