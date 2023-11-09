@@ -1,0 +1,27 @@
+name: Get Latest Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  get_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get latest release
+        id: get_latest_release
+        run: |
+          latest_release=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+          echo "Latest release: $latest_release"
+          echo "::set-output name=release::$latest_release"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report latest release
+        run: |
+          echo "The latest release is ${{ steps.get_latest_release.outputs.release }}"
