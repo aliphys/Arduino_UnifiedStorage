@@ -33,10 +33,10 @@ jobs:
           echo "Version in library.properties: $version"
           if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
             echo "Versions match!"
-            deleteRelease=0
+            $deleteRelease=0
           else
             echo "Versions don't match."
-            deleteRelease=1
+            $deleteRelease=1
           fi
 
       - name: Delete release if failed
