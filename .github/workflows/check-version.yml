@@ -41,13 +41,7 @@ jobs:
 
       - name: Delete release if failed
         if: ${{ steps.compare_version.outputs.version != steps.get_latest_release.outputs.release }}
-        uses: cb80/delrel@latest
+        uses: dev-drprasad/delete-tag-and-release@v0.2.1
         with:
-          tag: ${{ steps.get_latest_release.outputs.release }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-    
-      - name: Delete tags with no release
-        if: ${{ steps.compare_version.outputs.version != steps.get_latest_release.outputs.release }}
-        uses: fabriziocacicia/delete-tags-without-release-action@v0.1.0
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.get_latest_release.outputs.release }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
