@@ -1,12 +1,11 @@
-name: Get Latest Release
+name: Check Library version
 
+# only run workflow upon new release
 on:
-  push:
-    branches:
-      - main
   release:
     types:
-      - published
+      - published # stable AND pre-releases
+
 
 jobs:
   get_release:
@@ -14,17 +13,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get latest release
+        # get the release tag of the last release and save as $latest_release
         id: get_latest_release
         run: |
-          set -e
           response=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest")
-          echo "Response: $response"
+          echo "Curl eesponse: $response"
           latest_release=$(echo "$response" | jq -r .tag_name)
           echo "Latest release: $latest_release"
-          echo "::set-output name=release::$latest_release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
