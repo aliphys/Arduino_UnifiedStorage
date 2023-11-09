@@ -32,13 +32,13 @@ jobs:
           echo "Version in library.properties: $version"
           if [ "$version" == "${{ steps.get_release.outputs.release }}" ]; then
             echo "Versions match!"
-            echo "Version is $Version"
+            echo "Version is $version"
             echo "Libary.properties version is: ${{ steps.compare_version.outputs.version}}"
             echo "Release version is: ${{steps.get_latest_release.outputs.release }}"
             deleteRelease=0
           else
             echo "Versions don't match."
-            echo "Version is $Version"
+            echo "Version is $version"
             echo "Libary.properties version is: ${{ steps.compare_version.outputs.version}}"
             echo "Release version is: ${{steps.get_latest_release.outputs.release }}"
             deleteRelease=1
