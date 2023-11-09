@@ -17,6 +17,7 @@ jobs:
         id: get_latest_release
         run: |
           latest_release=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+          echo "${{ github.repository }}"
           echo "Latest release: $latest_release"
           echo "::set-output name=release::$latest_release"
         env:
