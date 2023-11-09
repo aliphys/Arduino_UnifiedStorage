@@ -33,16 +33,15 @@ jobs:
           if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
             echo "Versions match!"
             echo "Version is $version"
-            echo "Libary.properties version is: ${{ steps.compare_version.outputs.version}}"
             echo "Release version is: ${{steps.get_latest_release.outputs.release }}"
             deleteRelease=0
           else
             echo "Versions don't match."
             echo "Version is $version"
-            echo "Libary.properties version is: ${{ steps.compare_version.outputs.version}}"
             echo "Release version is: ${{steps.get_latest_release.outputs.release }}"
             deleteRelease=1
           fi
+          echo "::set-output name=version::$version"
 
       - name: Delete release if failed
         if: ${{ steps.compare_version.outputs.version != steps.get_latest_release.outputs.release }}
