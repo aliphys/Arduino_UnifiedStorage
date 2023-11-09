@@ -1,11 +1,9 @@
-name: Check Library version
+name: Get Latest Release
 
-# only run workflow upon new release
 on:
   release:
     types:
-      - published # stable AND pre-releases
-
+      - published
 
 jobs:
   get_release:
@@ -13,17 +11,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Get latest release
-        # get the release tag of the last release and save as $latest_release
         id: get_latest_release
         run: |
+          set -e
           response=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest")
-          echo "Curl response: $response"
+          echo "Response: $response"
           latest_release=$(echo "$response" | jq -r .tag_name)
           echo "Latest release: $latest_release"
-          echo "release=${latest_release}" >> $GITHUB_ENV
+          echo "::set-output name=release::$latest_release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -32,7 +30,7 @@ jobs:
         run: |
           version=$(cat library.properties | grep "version" | cut -d'=' -f2)
           echo "Version in library.properties: $version"
-          if [ "$version" == "${{ steps.get_latest_release.outputs.release }}" ]; then
+          if [ "$version" == "${{ steps.get_release.outputs.release }}" ]; then
             echo "Versions match!"
             deleteRelease=0
           else
@@ -45,4 +43,4 @@ jobs:
         uses: cb80/delrel@latest
         with:
           tag: ${{ steps.get_latest_release.outputs.release }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MY_TOKEN }}
