@@ -1,0 +1,25 @@
+name: C++11 Compatibility Check
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    build:
+        name: C++11 Compatibility Check
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Install Clang
+              run: sudo apt-get install clang
+
+            - name: Compile with Clang (C++98)
+              run: clang++ -std=c++98 -I. -o output98 examples\AdvancedUSBInternalOperations\AdvancedUSBInternalOperations.ino
