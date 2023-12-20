@@ -62,6 +62,11 @@ jobs:
                     echo "Error: Compiler directive detected in ${{ matrix.sketch }}"
                     exit 1
                 fi
+            - name: Check line length  on ${{ matrix.sketch }}
+              run: |
+                    awk 'length($0) > 80 { print "Warning: A line in "FILENAME" exceeds 80 characters." }
+                             length($0) > 120 { print "Error: A line in "FILENAME" exceeds 120 characters."; exitCode=1 } 
+                             END { exit exitCode }' ${{ matrix.sketch }}
 
     build-headers-sources:
         needs: list-headers-sources
@@ -82,3 +87,8 @@ jobs:
                                      --std=c++11 \
                                      --language=c++ \
                                      ${{ matrix.file }}
+            - name: Check line length  on ${{ matrix.file }}
+              run: |
+                    awk 'length($0) > 80 { print "Warning: A line in "FILENAME" exceeds 80 characters." $0}
+                             length($0) > 120 { print "Error: A line in "FILENAME" exceeds 120 characters." $0; exitCode=1 } 
+                             END { exit exitCode }' ${{ matrix.file }}
