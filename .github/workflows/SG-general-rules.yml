@@ -22,4 +22,9 @@ jobs:
               run: sudo apt-get install cppcheck
             
             - name: Run cppcheck (C++11)
-              run: cppcheck --enable=all --std=c++11 --language=c++ examples/AdvancedUSBInternalOperations/AdvancedUSBInternalOperations.ino
+              run: cppcheck --enable=all \
+                   --std=c++11 \
+                   --language=c++ \
+                   --suppress=unusedFunction:*/setup \
+                   --suppress=unusedFunction:*/loop \
+                   examples/AdvancedUSBInternalOperations/AdvancedUSBInternalOperations.ino
