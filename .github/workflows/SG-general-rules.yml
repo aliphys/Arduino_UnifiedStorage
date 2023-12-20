@@ -10,10 +10,25 @@ on:
     workflow_dispatch:
 
 jobs:
-    build:
-        name: C++11 Compatibility Check
+    list:
         runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
 
+            - id: set-matrix
+              run: |
+                echo "::set-output name=matrix::{\"sketch\": $(find examples -name '*.ino' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
+        shell: bash
+
+    build:
+        needs: list
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                sketch: ${{fromJson(needs.list.outputs.matrix).sketch}}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
@@ -21,11 +36,11 @@ jobs:
             - name: Install cppcheck
               run: sudo apt-get install cppcheck
             
-            - name: Run cppcheck (C++11)
+            - name: Run cppcheck (C++11) on ${{ matrix.sketch }}
               run: |
                     cppcheck --enable=all \
                                      --std=c++11 \
                                      --language=c++ \
                                      --suppress=unusedFunction:setup \
                                      --suppress=unusedFunction:loop \
-                                     examples/AdvancedUSBInternalOperations/AdvancedUSBInternalOperations.ino
+                                     ${{ matrix.sketch }}
