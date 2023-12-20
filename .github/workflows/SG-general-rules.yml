@@ -18,8 +18,8 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v2
 
-            - name: Install Clang
-              run: sudo apt-get install clang
-
-            - name: Compile with Clang (C++98)
-              run: clang++ -std=c++98 -I. -o output98 examples/AdvancedUSBInternalOperations/AdvancedUSBInternalOperations.ino
+            - name: Install cppcheck
+              run: sudo apt-get install cppcheck
+            
+            - name: Run cppcheck (C++11)
+              run: cppcheck --enable=all --std=c++11 examples/AdvancedUSBInternalOperations/AdvancedUSBInternalOperations.ino
