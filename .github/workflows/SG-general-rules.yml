@@ -21,7 +21,6 @@ jobs:
             - id: set-matrix
               run: |
                 echo "::set-output name=matrix::{\"sketch\": $(find examples -name '*.ino' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
-        shell: bash
 
     build:
         needs: list
