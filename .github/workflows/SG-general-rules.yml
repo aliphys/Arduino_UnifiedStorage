@@ -22,4 +22,4 @@ jobs:
               run: sudo apt-get install clang
 
             - name: Compile with Clang (C++98)
-              run: clang++ -std=c++98 -I. -o output98 examples\AdvancedUSBInternalOperations\AdvancedUSBInternalOperations.ino
+              run: clang++ -std=c++98 -I. -o output98 examples/AdvancedUSBInternalOperations/AdvancedUSBInternalOperations.ino
