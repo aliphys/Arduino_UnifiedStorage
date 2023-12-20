@@ -10,7 +10,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    list:
+    list-sketches:
         runs-on: ubuntu-latest
         outputs:
             matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -20,21 +20,33 @@ jobs:
 
             - id: set-matrix
               run: |
-                echo "::set-output name=matrix::{\"sketch\": $(find examples -name '*.ino' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
+                    echo "::set-output name=matrix::{\"sketch\": $(find examples -name '*.ino' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
 
-    build:
-        needs: list
+    list-headers-sources:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - id: set-matrix
+              run: |
+                    echo "::set-output name=matrix::{\"file\": $(find . -name '*.h' -o -name '*.cpp' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
+
+    build-sketches:
+        needs: list-sketches
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                sketch: ${{fromJson(needs.list.outputs.matrix).sketch}}
+                sketch: ${{fromJson(needs.list-sketches.outputs.matrix).sketch}}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
 
             - name: Install cppcheck
               run: sudo apt-get install cppcheck
-            
+
             - name: Run cppcheck (C++11) on ${{ matrix.sketch }}
               run: |
                     cppcheck --enable=all \
@@ -43,3 +55,23 @@ jobs:
                                      --suppress=unusedFunction:setup \
                                      --suppress=unusedFunction:loop \
                                      ${{ matrix.sketch }}
+
+    build-headers-sources:
+        needs: list-headers-sources
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                file: ${{fromJson(needs.list-headers-sources.outputs.matrix).file}}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Install cppcheck
+              run: sudo apt-get install cppcheck
+
+            - name: Run cppcheck (C++11) on ${{ matrix.file }}
+              run: |
+                    cppcheck --enable=all \
+                                     --std=c++11 \
+                                     --language=c++ \
+                                     ${{ matrix.file }}
