@@ -56,6 +56,13 @@ jobs:
                                      --suppress=unusedFunction:loop \
                                      ${{ matrix.sketch }}
 
+            - name: Check for compiler directives
+              run: |
+                if grep -n -e "#pragma" -e "#define" ${{ matrix.sketch }}; then
+                    echo "Error: Compiler directive detected in ${{ matrix.sketch }}"
+                    exit 1
+                fi
+
     build-headers-sources:
         needs: list-headers-sources
         runs-on: ubuntu-latest
