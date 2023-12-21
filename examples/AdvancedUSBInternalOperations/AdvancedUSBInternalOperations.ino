@@ -30,7 +30,8 @@ InternalStorage internalStorage;
 
 
 // Helper function to prints the contents of a folder, including subdirectories (marked as "[D]") and files (marked as "[F]").
-void printFolderContents(Folder dir, int indentation = 0) {
+void printFolderContents(Folder dir, int indentation = 0)
+{
   std::vector<Folder> directories = dir.getFolders();
   std::vector<UFile> files = dir.getFiles();
 
