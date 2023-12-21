@@ -24,14 +24,14 @@ jobs:
           fi
 
       - name: Install clang-format
-        run: sudo apt-get install clang-format-10
+        run: sudo apt-get install clang-format
 
       - name: Check sketches for clang-format compliance
         run: |
           FILES=$(find . -name '*.ino' -or -name '*.h' -or -name '*.cpp')
           for FILE in $FILES
           do
-            clang-format-10 -style=file -output-replacements-xml $FILE | grep "<replacement " > /dev/null
+            clang-format -style=file -output-replacements-xml $FILE | grep "<replacement " > /dev/null
             if [ $? -ne 0 ]
             then
               echo "File $FILE is not compliant with clang-format!"
