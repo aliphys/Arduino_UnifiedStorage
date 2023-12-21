@@ -49,7 +49,7 @@ jobs:
 
             - name: Run cppcheck (C++11) on ${{ matrix.sketch }}
               run: |
-                    cppcheck --enable=all \
+                    cppcheck --enable=all, style \    # Enable all checks and style checks (including casts)
                                      --std=c++11 \
                                      --language=c++ \
                                      --suppress=unusedFunction:setup \
@@ -67,6 +67,11 @@ jobs:
                     awk 'length($0) > 80 { print "Warning: A line in "FILENAME" exceeds 80 characters." }
                              length($0) > 120 { print "Error: A line in "FILENAME" exceeds 120 characters."; exitCode=1 } 
                              END { exit exitCode }' ${{ matrix.sketch }}
+            - name: Check for 'auto' in variable declarations
+              run: |
+                if grep -q -E "auto [a-zA-Z_][a-zA-Z0-9_]*" ${{ matrix.sketch }}; then
+                    echo "'auto' used in variable declaration in ${{ matrix.sketch }}"
+                fi
 
     build-headers-sources:
         needs: list-headers-sources
@@ -92,3 +97,32 @@ jobs:
                     awk 'length($0) > 80 { print "Warning: A line in "FILENAME" exceeds 80 characters." $0}
                              length($0) > 120 { print "Error: A line in "FILENAME" exceeds 120 characters." $0; exitCode=1 } 
                              END { exit exitCode }' ${{ matrix.file }}
+
+            - name: Warn about casts
+              run: |
+                if grep -r -E '\([a-zA-Z0-9_]+\)' ${{ matrix.file }}; then # gives false psitive for function calls :(
+                  echo "Warning: Casts found in code."
+                fi
+
+            - name: Check brace style
+              run: |
+                    sudo apt-get install -y clang-format
+                    if ! clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4}" -output-replacements-xml ${{ matrix.file }} | grep "<replacement " ; then
+                        echo "Error: Brace style does not conform to LLVM style in ${{ matrix.file }}"
+                        exit 1
+                    fi
+            - name: Check for Arduino keywords
+              run: |
+                curl -O https://raw.githubusercontent.com/highlightjs/highlight.js/063876f86c53713a665de0b17b8d795ae5fce0a1/src/languages/arduino.js
+                keywords=$(grep -oP "keywords: '\K[^']*")
+                for keyword in $keywords; do
+                    if grep -q -E "$keyword [a-zA-Z_][a-zA-Z0-9_]*" ${{ matrix.file }}; then # TODO specify void/int/float manually
+                        echo "Keyword $keyword used in new definition in ${{ matrix.file }}"
+                    fi
+                done
+            - name: Check for 'auto' in variable declarations
+              run: |
+                if grep -q -E "auto [a-zA-Z_][a-zA-Z0-9_]*" ${{ matrix.file }}; then
+                    echo "'auto' used in variable declaration in ${{ matrix.file }}"
+                fi
+                             
