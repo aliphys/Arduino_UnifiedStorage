@@ -1,0 +1,94 @@
+name: C++11 Compatibility Check
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+         branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    list-sketches:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - id: set-matrix
+              run: |
+                    echo "::set-output name=matrix::{\"sketch\": $(find examples -name '*.ino' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
+
+    list-headers-sources:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - id: set-matrix
+              run: |
+                    echo "::set-output name=matrix::{\"file\": $(find . -name '*.h' -o -name '*.cpp' | jq -R -s -c 'split("\n") | map(select(length > 0))')}"
+
+    build-sketches:
+        needs: list-sketches
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                sketch: ${{fromJson(needs.list-sketches.outputs.matrix).sketch}}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Install cppcheck
+              run: sudo apt-get install cppcheck
+
+            - name: Run cppcheck (C++11) on ${{ matrix.sketch }}
+              run: |
+                    cppcheck --enable=all \
+                                     --std=c++11 \
+                                     --language=c++ \
+                                     --suppress=unusedFunction:setup \
+                                     --suppress=unusedFunction:loop \
+                                     ${{ matrix.sketch }}
+
+            - name: Check for compiler directives
+              run: |
+                if grep -n -e "#pragma" -e "#define" ${{ matrix.sketch }}; then
+                    echo "Error: Compiler directive detected in ${{ matrix.sketch }}"
+                    exit 1
+                fi
+            - name: Check line length  on ${{ matrix.sketch }}
+              run: |
+                    awk 'length($0) > 80 { print "Warning: A line in "FILENAME" exceeds 80 characters." }
+                             length($0) > 120 { print "Error: A line in "FILENAME" exceeds 120 characters."; exitCode=1 } 
+                             END { exit exitCode }' ${{ matrix.sketch }}
+
+    build-headers-sources:
+        needs: list-headers-sources
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                file: ${{fromJson(needs.list-headers-sources.outputs.matrix).file}}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Install cppcheck
+              run: sudo apt-get install cppcheck
+
+            - name: Run cppcheck (C++11) on ${{ matrix.file }}
+              run: |
+                    cppcheck --enable=all \
+                                     --std=c++11 \
+                                     --language=c++ \
+                                     ${{ matrix.file }}
+            - name: Check line length  on ${{ matrix.file }}
+              run: |
+                    awk 'length($0) > 80 { print "Warning: A line in "FILENAME" exceeds 80 characters." $0}
+                             length($0) > 120 { print "Error: A line in "FILENAME" exceeds 120 characters." $0; exitCode=1 } 
+                             END { exit exitCode }' ${{ matrix.file }}
